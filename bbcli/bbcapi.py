@@ -75,22 +75,27 @@ class BBC:
                 }
             )
 
-        sorted_news_data = sorted(
-            news_data, key=lambda x: x["datetime"], reverse=True)
+        news_data_sorted = sorted(
+            news_data,
+            key=lambda x: x["datetime"],
+            reverse=True
+        )
 
-        t_news = []
-        for data in sorted_news_data:
-            ts_human_time = arrow.get(data["datetime"]).humanize()
-            ts_last_updated = "Last updated: " + str(ts_human_time)
-            news = News(
+        news_item_list = []
+        for data in news_data_sorted:
+            timestamp_human = arrow.get(data["datetime"]).humanize()
+            timestamp_last_updated = "Last updated: " + str(timestamp_human)
+
+            news = NewsItem(
                 data["title"],
                 data["link"],
                 data["description"],
-                ts_last_updated
+                timestamp_last_updated
             )
-            t_news.append(news)
 
-        return t_news
+            news_item_list.append(news)
+
+        return news_item_list
 
     def get_bbc_story(self):
         res = None
@@ -100,12 +105,14 @@ class BBC:
             "Connection": "Keep-Alive",
             "Accept": "application/json",
         }
+
         try:
             res = requests.get(
                 API_BASE_URL + "/news/world/rss.xml",
                 data=None,
                 headers=headers
             )
+
         except requests.ConnectionError as e:
             if hasattr(e, "reason"):
                 print("We failed to reach a server.")
@@ -113,6 +120,7 @@ class BBC:
             elif hasattr(e, "code"):
                 print("The server couldn't fulfill the request.")
                 print("Error code: ", e.code)
+
         return res
 
     def get_bbc_ticker(self):
@@ -136,7 +144,7 @@ class BBC:
         return res
 
 
-class News:
+class NewsItem:
     def __init__(self, title, link, description, last_updated):
         self.title = title
         self.link = link
