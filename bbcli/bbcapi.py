@@ -1,5 +1,3 @@
-import os
-import json
 import arrow
 import requests
 import xml.etree.ElementTree as ET
@@ -13,7 +11,7 @@ API_BASE_URL = "https://feeds.bbci.co.uk"
 class BBC:
     def get_top_stories(self):
         news = self.get_bbc_story()
-        if news == None:
+        if news is None:
             return None
         else:
             data = news.text
@@ -21,7 +19,7 @@ class BBC:
 
     def get_ticker(self):
         ticker = self.get_bbc_ticker()
-        if ticker == None:
+        if ticker is None:
             return None
         elif ticker.status_code == 404:
             return None
@@ -32,7 +30,7 @@ class BBC:
     def parse_ticker_data(self, data):
         tickers = []
 
-        if bool(data["asset"]) == False:
+        if bool(data["asset"]) is False:
             return tickers
 
         # Headline
@@ -51,15 +49,18 @@ class BBC:
         root = ET.fromstring(xml_data)
 
         for item in root.findall(".//item"):
-            ts_title = item.find("title").text if item.find("title") is not None else ""
-            ts_link = item.find("link").text if item.find("link") is not None else ""
+            ts_title = item.find("title").text if item.find(
+                "title") is not None else ""
+            ts_link = item.find("link").text if item.find(
+                "link") is not None else ""
             ts_description = (
                 item.find("description").text
                 if item.find("description") is not None
                 else ""
             )
             pubDate = (
-                item.find("pubDate").text if item.find("pubDate") is not None else ""
+                item.find("pubDate").text if item.find(
+                    "pubDate") is not None else ""
             )
 
             ts_time = datetime.strptime(pubDate, "%a, %d %b %Y %H:%M:%S %Z")
@@ -74,14 +75,18 @@ class BBC:
                 }
             )
 
-        sorted_news_data = sorted(news_data, key=lambda x: x["datetime"], reverse=True)
+        sorted_news_data = sorted(
+            news_data, key=lambda x: x["datetime"], reverse=True)
 
         t_news = []
         for data in sorted_news_data:
             ts_human_time = arrow.get(data["datetime"]).humanize()
             ts_last_updated = "Last updated: " + str(ts_human_time)
             news = News(
-                data["title"], data["link"], data["description"], ts_last_updated
+                data["title"],
+                data["link"],
+                data["description"],
+                ts_last_updated
             )
             t_news.append(news)
 
@@ -97,7 +102,9 @@ class BBC:
         }
         try:
             res = requests.get(
-                API_BASE_URL + "/news/world/rss.xml", data=None, headers=headers
+                API_BASE_URL + "/news/world/rss.xml",
+                data=None,
+                headers=headers
             )
         except requests.ConnectionError as e:
             if hasattr(e, "reason"):

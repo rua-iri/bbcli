@@ -1,5 +1,4 @@
 import os
-import time
 import urwid
 import webbrowser
 import configparser
@@ -8,6 +7,7 @@ from .bbcapi import BBC
 from datetime import datetime
 
 _config = None
+
 
 class BBCNews(object):
 
@@ -42,7 +42,7 @@ class BBCNews(object):
 def get_top_stories():
     bbc = BBC()
     news = bbc.get_top_stories()
-    if news == None:
+    if news is None:
         pass
     else:
         for i, story in enumerate(news[:30]):
@@ -54,7 +54,7 @@ def read_config():
     config = configparser.ConfigParser()
     if os.path.exists(os.path.expanduser('~' + '/.' + filename)):
         config.read(os.path.expanduser('~' + '/.' + filename))
-    elif os.path.exists ( os.path.expanduser('~' + '/.config/' + filename)):
+    elif os.path.exists(os.path.expanduser('~' + '/.config/' + filename)):
         config.read(os.path.expanduser('~' + '/.config/' + filename))
     return config
 
@@ -131,23 +131,23 @@ class UI(object):
 
     # defaults
     keys = {
-        'quit'        : 'q',
-        'open'        : 'w',
-        'tabopen'     : 't',
-        'refresh'     : 'r',
-        'latest'      : 'l',
-        'scroll_up'   : 'k',
-        'scroll_down' : 'j',
-        'top'         : 'g',
-        'bottom'      : 'G'
+        'quit': 'q',
+        'open': 'w',
+        'tabopen': 't',
+        'refresh': 'r',
+        'latest': 'l',
+        'scroll_up': 'k',
+        'scroll_down': 'j',
+        'top': 'g',
+        'bottom': 'G'
     }
 
     mouse_button = {
-        'left'       : 1,
-        'middle'     : 2,
-        'right'      : 3,
-        'wheel_up'   : 4,
-        'wheel_down' : 5
+        'left': 1,
+        'middle': 2,
+        'right': 3,
+        'wheel_up': 4,
+        'wheel_down': 5
     }
 
     tickers = None
@@ -188,7 +188,7 @@ class UI(object):
             for option in _config.options('Keys'):
                 try:
                     self.keys[option] = _config.get('Keys', option)
-                except:
+                except Exception:
                     pass
 
     def get_stories(self):
@@ -204,10 +204,10 @@ class UI(object):
             return True
 
     def alreadyOnline(self):
-        if self.isOnline() == False:
+        if self.isOnline() is False:
             self.count = 0
             return False
-        elif self.isOnline() == True:
+        elif self.isOnline() is True:
             self.count = self.count + 1
         if self.count >= 2:
             self.count = 2
@@ -227,10 +227,12 @@ class UI(object):
 
     def update_ticker(self):
         self.tickers = self.get_tickers()
-        if self.isOnline() == False:
-            self.view.set_body(urwid.AttrWrap(self.populate_stories(), 'offline_bg'))
+        if self.isOnline() is False:
+            self.view.set_body(urwid.AttrWrap(
+                self.populate_stories(), 'offline_bg'))
             self.view.set_header(header=self.offlineHeader)
-            self.view.set_footer(urwid.AttrWrap(urwid.Text("You are currently offline. Please check your internet connection."), 'offline'))
+            self.view.set_footer(urwid.AttrWrap(urwid.Text(
+                "You are currently offline. Please check your internet connection."), 'offline'))
         else:
             self.set_status_bar("Ticker initalised.")
 
@@ -291,9 +293,11 @@ class UI(object):
         self.alreadyOnline()
         if self.count == 0:
             self.tickers = []
-            self.view.set_body(urwid.AttrWrap(self.populate_stories(), 'offline_bg'))
+            self.view.set_body(urwid.AttrWrap(
+                self.populate_stories(), 'offline_bg'))
             self.view.set_header(header=self.offlineHeader)
-            self.view.set_footer(urwid.AttrWrap(urwid.Text("You are currently offline. Please check your internet connection."), 'offline'))
+            self.view.set_footer(urwid.AttrWrap(urwid.Text(
+                "You are currently offline. Please check your internet connection."), 'offline'))
         if self.count == 1:
             self.view.set_header(header=self.header)
             self.view.set_body(urwid.AttrWrap(self.populate_stories(), 'body'))
@@ -312,27 +316,32 @@ class UI(object):
 
     def next_item(self, loop, *args):
         text = self.tickers
-        if(not text):
+        if (not text):
             self.link = ''
             self.view.set_footer(urwid.AttrWrap(urwid.Text(""), 'body'))
         else:
             self.loop.draw_screen()
-            if(self.ticker_count < len(text)):
+            if (self.ticker_count < len(text)):
                 self.ticker_count += 1
-            if(self.ticker_count == len(text)):
+            if (self.ticker_count == len(text)):
                 self.ticker_count = 0
-            if(not text[self.ticker_count].url and text[self.ticker_count].breaking == "true"):
-                final_ticker = "[" + text[self.ticker_count].prompt +"] " + text[self.ticker_count].headline
+            if (not text[self.ticker_count].url and text[self.ticker_count].breaking == "true"):
+                final_ticker = "[" + text[self.ticker_count].prompt + \
+                    "] " + text[self.ticker_count].headline
                 msg = '%s' % (final_ticker.rjust(len(final_ticker)+1))
-                self.view.set_footer(urwid.AttrWrap(urwid.Text(msg), 'breaking'))
+                self.view.set_footer(urwid.AttrWrap(
+                    urwid.Text(msg), 'breaking'))
                 self.set_latest_links(text[self.ticker_count].url)
             elif text[self.ticker_count].url and text[self.ticker_count].breaking == "true":
-                final_ticker = "[" + text[self.ticker_count].prompt +"] " + text[self.ticker_count].headline
+                final_ticker = "[" + text[self.ticker_count].prompt + \
+                    "] " + text[self.ticker_count].headline
                 msg = '%s' % (final_ticker.rjust(len(final_ticker)+1))
-                self.view.set_footer(urwid.AttrWrap(urwid.Text(msg), 'breaking'))
+                self.view.set_footer(urwid.AttrWrap(
+                    urwid.Text(msg), 'breaking'))
                 self.set_latest_links(text[self.ticker_count].url)
             else:
-                self.set_status_bar("[" + text[self.ticker_count].prompt +"] " + text[self.ticker_count].headline)
+                self.set_status_bar(
+                    "[" + text[self.ticker_count].prompt + "] " + text[self.ticker_count].headline)
                 self.set_latest_links(text[self.ticker_count].url)
         self.loop.set_alarm_in(10, self.next_item)
 
@@ -341,11 +350,14 @@ class UI(object):
         self.update_ticker()
         self.refresh_with_new_stories()
         ct = datetime.now().strftime('%H:%M:%S')
-        if online == False:
-            self.set_status_bar('You are currently offline. Please check your internet connection.')
+        if online is False:
+            self.set_status_bar(
+                'You are currently offline. Please check your internet connection.')
         else:
-            self.set_status_bar('Automatically updated ticker and fetched new stories at: %s' % ct)
+            self.set_status_bar(
+                'Automatically updated ticker and fetched new stories at: %s' % ct)
         self.loop.set_alarm_in(200, self._wrapped_refresh)
+
 
 def live():
     u = UI()
