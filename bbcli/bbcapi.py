@@ -25,9 +25,7 @@ class BBC:
         news_item_data = data_dict["rss"]["channel"]["item"]
 
         for item in news_item_data:
-
             published_date = item.get("pubDate")
-
             timestamp_time = datetime.strptime(
                 published_date,
                 "%a, %d %b %Y %H:%M:%S %Z"
@@ -82,12 +80,8 @@ class BBC:
             )
 
         except requests.ConnectionError as e:
-            if hasattr(e, "reason"):
-                print("We failed to reach a server.")
-                print("Reason: ", e.reason)
-            elif hasattr(e, "code"):
-                print("The server couldn't fulfill the request.")
-                print("Error code: ", e.code)
+            print("Connection Error Occurred")
+            print(e)
 
         return res
 
