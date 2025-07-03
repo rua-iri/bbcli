@@ -49,16 +49,6 @@ def get_top_stories():
             yield BBCNews(i, story)
 
 
-def read_config():
-    filename = 'bbcli'
-    config = configparser.ConfigParser()
-    if os.path.exists(os.path.expanduser('~' + '/.' + filename)):
-        config.read(os.path.expanduser('~' + '/.' + filename))
-    elif os.path.exists(os.path.expanduser('~' + '/.config/' + filename)):
-        config.read(os.path.expanduser('~' + '/.config/' + filename))
-    return config
-
-
 def open_browser(url):
     webbrowser.open(url, 2)
 
@@ -67,24 +57,31 @@ class ItemWidget(urwid.WidgetWrap):
 
     def __init__(self, s):
         self.story_link = s.story_link
-        story_title = urwid.AttrWrap(urwid.Text(
-            '%s. %s' % (s.story_number, s.story_title)),
-            'body', 'focus'
+        story_title = urwid.AttrWrap(
+            urwid.Text(f'{s.story_number}. {s.story_title}'),
+            'body',
+            'focus'
         )
-        story_description = urwid.AttrWrap(urwid.Text(
-            '    %s' % (s.story_description)),
-            'subtext', 'focus'
+        story_description = urwid.AttrWrap(
+            urwid.Text(f'    {s.story_description}'),
+            'subtext',
+            'focus'
         )
-        story_last_updated = urwid.AttrWrap(urwid.Text(
-            '    %s' % (s.last_updated)),
-            'subtext', 'focus'
+        story_last_updated = urwid.AttrWrap(
+            urwid.Text(f'    {s.last_updated}'),
+            'subtext',
+            'focus'
         )
         pile = urwid.Pile([story_title, story_description, story_last_updated])
         self.item = [
             urwid.Padding(pile, left=1, right=1),
-            ('flow', urwid.AttrWrap(urwid.Text(
-                ' ', align="right"), 'body', 'focus'
-            ))
+            (
+                'flow',
+                urwid.AttrWrap(
+                    urwid.Text(' ', align="right"),
+                    'body',
+                    'focus'
+                ))
         ]
         w = urwid.Columns(self.item, focus_column=0)
         super(ItemWidget, self).__init__(w)
@@ -110,22 +107,31 @@ class UI(object):
     ]
 
     header = [
-        urwid.AttrWrap(urwid.Text(
-            ' BBC | NEWS', align='center'), 'head'
+        urwid.AttrWrap(
+            urwid.Text(' BBC | NEWS', align='center'),
+            'head'
         ),
-        ('flow', urwid.AttrWrap(urwid.Text(
-            ' ', align="left"), 'head'
-        )),
+        (
+            'flow',
+            urwid.AttrWrap(
+                urwid.Text(' ', align="left"),
+                'head'
+            )),
     ]
     header = urwid.Columns(header)
 
     offlineHeader = [
-        urwid.AttrWrap(urwid.Text(
-            ' BBC | NEWS (Offline)', align='center'), 'head'
+        urwid.AttrWrap(
+            urwid.Text(' BBC | NEWS (Offline)', align='center'),
+            'head'
         ),
-        ('flow', urwid.AttrWrap(urwid.Text(
-            ' ', align="left"), 'head'
-        )),
+        (
+            'flow',
+            urwid.AttrWrap(
+                urwid.Text(' ', align="left"),
+                'head'
+            )
+        ),
     ]
     offlineHeader = urwid.Columns(offlineHeader)
 
@@ -156,7 +162,6 @@ class UI(object):
     def run(self):
         self.make_screen()
         urwid.set_encoding('utf-8')
-        self.set_keys()
         try:
             self.loop.run()
         except KeyboardInterrupt:
@@ -176,16 +181,6 @@ class UI(object):
         )
         self.loop.screen.set_terminal_properties(colors=256)
         self.loop.set_alarm_in(200, self._wrapped_refresh)
-
-    def set_keys(self):
-        global _config
-        _config = read_config()
-        if _config.has_section('Keys'):
-            for option in _config.options('Keys'):
-                try:
-                    self.keys[option] = _config.get('Keys', option)
-                except Exception:
-                    pass
 
     def get_stories(self):
         items = list()
@@ -218,7 +213,7 @@ class UI(object):
         return self.listbox
 
     def set_status_bar(self, msg):
-        msg = '%s' % (msg.rjust(len(msg)+1))
+        msg = f'{msg.rjust(len(msg)+1)}'
         self.view.set_footer(urwid.AttrWrap(urwid.Text(msg), 'footer'))
 
     def open_story_link(self):
@@ -277,15 +272,17 @@ class UI(object):
         items = self.get_stories()
         self.alreadyOnline()
         if self.count == 0:
-            self.view.set_body(urwid.AttrWrap(
-                self.populate_stories(), 'offline_bg'))
-            self.view.set_header(header=self.offlineHeader)
-            self.view.set_footer(urwid.AttrWrap(
-                urwid.Text(
-                    "You are currently offline. Please check your internet connection."
-                ),
-                'offline'
+            self.view.set_body(
+                urwid.AttrWrap(self.populate_stories(), 'offline_bg')
             )
+            self.view.set_header(header=self.offlineHeader)
+            self.view.set_footer(
+                urwid.AttrWrap(
+                    urwid.Text(
+                        "You are currently offline. Please check your internet connection."
+                    ),
+                    'offline'
+                )
             )
         if self.count == 1:
             self.view.set_header(header=self.header)
@@ -306,7 +303,8 @@ class UI(object):
                 'You are currently offline. Please check your internet connection.')
         else:
             self.set_status_bar(
-                'Automatically updated ticker and fetched new stories at: %s' % ct)
+                f'Automatically updated ticker and fetched new stories at: {ct}'
+            )
         self.loop.set_alarm_in(200, self._wrapped_refresh)
 
 

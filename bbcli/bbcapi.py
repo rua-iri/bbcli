@@ -26,6 +26,7 @@ class BBC:
 
         for item in news_item_data:
             published_date = item.get("pubDate")
+
             timestamp_time = datetime.strptime(
                 published_date,
                 "%a, %d %b %Y %H:%M:%S %Z"
