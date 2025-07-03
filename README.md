@@ -3,7 +3,8 @@
 
 Browse BBC News like a hacker. (based on pyhackernews)
 
-![image](https://cloud.githubusercontent.com/assets/2040416/6029751/a176a20a-abea-11e4-8be4-ba435b3b48c0.gif)
+![demo2](https://github.com/user-attachments/assets/71ceb6e8-1345-451e-8523-d792b68804c6)
+
 
 # installation & usage:
 
