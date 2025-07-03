@@ -221,7 +221,6 @@ class UI(object):
         msg = '%s' % (msg.rjust(len(msg)+1))
         self.view.set_footer(urwid.AttrWrap(urwid.Text(msg), 'footer'))
 
-
     def open_story_link(self):
         url = self.listbox.get_focus()[0].story_link
         open_browser(url)
@@ -281,8 +280,13 @@ class UI(object):
             self.view.set_body(urwid.AttrWrap(
                 self.populate_stories(), 'offline_bg'))
             self.view.set_header(header=self.offlineHeader)
-            self.view.set_footer(urwid.AttrWrap(urwid.Text(
-                "You are currently offline. Please check your internet connection."), 'offline'))
+            self.view.set_footer(urwid.AttrWrap(
+                urwid.Text(
+                    "You are currently offline. Please check your internet connection."
+                ),
+                'offline'
+            )
+            )
         if self.count == 1:
             self.view.set_header(header=self.header)
             self.view.set_body(urwid.AttrWrap(self.populate_stories(), 'body'))
@@ -290,10 +294,8 @@ class UI(object):
             self.walker[:] = items
             self.loop.draw_screen()
 
-
     def set_latest_links(self, link):
         self.link = link
-
 
     def _wrapped_refresh(self, loop, *args):
         online = self.isOnline()

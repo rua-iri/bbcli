@@ -1,11 +1,11 @@
 import arrow
 import requests
-import xml.etree.ElementTree as ET
 from datetime import datetime
+from xmltodict import parse as xml_parse_dict
 
 BBC_URL = "https://www.bbc.co.uk"
-BBC_POLLING_URL = "https://polling.bbc.co.uk"
 API_BASE_URL = "https://feeds.bbci.co.uk"
+WORLD_NEWS_ENDPOINT = "/news/world/rss.xml"
 
 
 class BBC:
@@ -15,38 +15,31 @@ class BBC:
             return None
         else:
             data = news.text
-            return self.parse_news(data)
+            return self.parse_news_improved(data)
 
-
-    def parse_news(self, xml_data):
+    def parse_news_improved(self, xml_data):
         news_data = []
 
-        root = ET.fromstring(xml_data)
+        data_dict = xml_parse_dict(xml_input=xml_data)
 
-        for item in root.findall(".//item"):
-            ts_title = item.find("title").text if item.find(
-                "title") is not None else ""
-            ts_link = item.find("link").text if item.find(
-                "link") is not None else ""
-            ts_description = (
-                item.find("description").text
-                if item.find("description") is not None
-                else ""
-            )
-            pubDate = (
-                item.find("pubDate").text if item.find(
-                    "pubDate") is not None else ""
-            )
+        news_item_data = data_dict["rss"]["channel"]["item"]
 
-            ts_time = datetime.strptime(pubDate, "%a, %d %b %Y %H:%M:%S %Z")
+        for item in news_item_data:
+
+            published_date = item.get("pubDate")
+
+            timestamp_time = datetime.strptime(
+                published_date,
+                "%a, %d %b %Y %H:%M:%S %Z"
+            )
 
             news_data.append(
                 {
-                    "title": ts_title,
-                    "link": ts_link,
-                    "description": ts_description,
-                    "datetime": ts_time,
-                    "pubDate": pubDate,
+                    "title": item.get("title"),
+                    "link": item.get("link"),
+                    "description": item.get("description"),
+                    "datetime": timestamp_time,
+                    "pubDate": published_date,
                 }
             )
 
@@ -83,7 +76,7 @@ class BBC:
 
         try:
             res = requests.get(
-                API_BASE_URL + "/news/world/rss.xml",
+                API_BASE_URL + WORLD_NEWS_ENDPOINT,
                 data=None,
                 headers=headers
             )
@@ -99,11 +92,9 @@ class BBC:
         return res
 
 
-
 class NewsItem:
     def __init__(self, title, link, description, last_updated):
         self.title = title
         self.link = link
         self.description = description
         self.last_updated = last_updated
-
