@@ -8,14 +8,21 @@ Browse BBC News from the comand line. (Based on pyhackernews)
 
 # Installation & Usage:
 
-```
+Set up virtual environment and install dependencies.
+
+```bash
 python3 -m venv .venv
 
 source .venv/bin/activate
 
 pip3 install .
 ```
-`bbcli`
+
+Then run the following to start the application.
+
+```bash
+bbcli
+```
 
 # Configuration:
 
