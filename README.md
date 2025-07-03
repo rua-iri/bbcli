@@ -1,24 +1,23 @@
 # bbcli
 
 
-Browse BBC News like a hacker. (based on pyhackernews)
+Browse BBC News from the comand line. (Based on pyhackernews)
 
 ![demo2](https://github.com/user-attachments/assets/71ceb6e8-1345-451e-8523-d792b68804c6)
 
 
-# installation & usage:
+# Installation & Usage:
 
-`pip install bbcli`
+```
+python3 -m venv .venv
 
-or
+source .venv/bin/activate
 
-`pip3 install bbcli`
-
-and then in terminal:
-
+pip3 install .
+```
 `bbcli`
 
-# configuration:
+# Configuration:
 
 Custom keybindings can be defined in either:
 
@@ -46,7 +45,3 @@ Like so:
 
     open = dwbremote :open %URL
     tabopen = dwbremote :tabopen %URL
-
-# credits
-
-Dan Claudiu Pop and Chase Franklin for pyhackernews.
