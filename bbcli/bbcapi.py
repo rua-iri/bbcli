@@ -17,31 +17,6 @@ class BBC:
             data = news.text
             return self.parse_news(data)
 
-    def get_ticker(self):
-        ticker = self.get_bbc_ticker()
-        if ticker is None:
-            return None
-        elif ticker.status_code == 404:
-            return None
-        else:
-            data = ticker.json(strict=False)
-        return self.parse_ticker_data(data)
-
-    def parse_ticker_data(self, data):
-        tickers = []
-
-        if bool(data["asset"]) is False:
-            return tickers
-
-        # Headline
-        headline = data["asset"]["headline"]
-
-        # News Link as in /news/
-        url = data["asset"]["assetUri"]
-
-        ticker = Ticker(headline, "BREAKING NEWS", "true", BBC_URL + url)
-        tickers.append(ticker)
-        return tickers
 
     def parse_news(self, xml_data):
         news_data = []
@@ -123,25 +98,6 @@ class BBC:
 
         return res
 
-    def get_bbc_ticker(self):
-        res = None
-        ua = {
-            "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:53.0) Gecko/20100101 Firefox/53.0"
-        }
-        try:
-            res = requests.get(
-                BBC_POLLING_URL + "/news/breaking-news/audience/domestic",
-                data=None,
-                headers=ua,
-            )
-        except requests.ConnectionError as e:
-            if hasattr(e, "reason"):
-                print("We failed to reach a server.")
-                print("Reason: ", e.reason)
-            elif hasattr(e, "code"):
-                print("The server couldn't fulfill the request.")
-                print("Error code: ", e.code)
-        return res
 
 
 class NewsItem:
@@ -151,10 +107,3 @@ class NewsItem:
         self.description = description
         self.last_updated = last_updated
 
-
-class Ticker:
-    def __init__(self, headline, prompt, breaking, url):
-        self.headline = headline
-        self.prompt = prompt
-        self.breaking = breaking
-        self.url = url

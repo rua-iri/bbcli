@@ -150,8 +150,6 @@ class UI(object):
         'wheel_down': 5
     }
 
-    tickers = None
-    ticker_count = -1
     count = 2
     link = ""
 
@@ -177,9 +175,7 @@ class UI(object):
             unhandled_input=self.handle_user_input
         )
         self.loop.screen.set_terminal_properties(colors=256)
-        self.update_ticker()
         self.loop.set_alarm_in(200, self._wrapped_refresh)
-        self.loop.set_alarm_in(5, self.next_item)
 
     def set_keys(self):
         global _config
@@ -225,16 +221,6 @@ class UI(object):
         msg = '%s' % (msg.rjust(len(msg)+1))
         self.view.set_footer(urwid.AttrWrap(urwid.Text(msg), 'footer'))
 
-    def update_ticker(self):
-        self.tickers = self.get_tickers()
-        if self.isOnline() is False:
-            self.view.set_body(urwid.AttrWrap(
-                self.populate_stories(), 'offline_bg'))
-            self.view.set_header(header=self.offlineHeader)
-            self.view.set_footer(urwid.AttrWrap(urwid.Text(
-                "You are currently offline. Please check your internet connection."), 'offline'))
-        else:
-            self.set_status_bar("Ticker initalised.")
 
     def open_story_link(self):
         url = self.listbox.get_focus()[0].story_link
@@ -292,7 +278,6 @@ class UI(object):
         items = self.get_stories()
         self.alreadyOnline()
         if self.count == 0:
-            self.tickers = []
             self.view.set_body(urwid.AttrWrap(
                 self.populate_stories(), 'offline_bg'))
             self.view.set_header(header=self.offlineHeader)
@@ -301,53 +286,17 @@ class UI(object):
         if self.count == 1:
             self.view.set_header(header=self.header)
             self.view.set_body(urwid.AttrWrap(self.populate_stories(), 'body'))
-            self.update_ticker()
         else:
             self.walker[:] = items
             self.loop.draw_screen()
 
-    def get_tickers(self):
-        bbc = BBC()
-        ticker_objs = bbc.get_ticker()
-        return ticker_objs
 
     def set_latest_links(self, link):
         self.link = link
 
-    def next_item(self, loop, *args):
-        text = self.tickers
-        if (not text):
-            self.link = ''
-            self.view.set_footer(urwid.AttrWrap(urwid.Text(""), 'body'))
-        else:
-            self.loop.draw_screen()
-            if (self.ticker_count < len(text)):
-                self.ticker_count += 1
-            if (self.ticker_count == len(text)):
-                self.ticker_count = 0
-            if (not text[self.ticker_count].url and text[self.ticker_count].breaking == "true"):
-                final_ticker = "[" + text[self.ticker_count].prompt + \
-                    "] " + text[self.ticker_count].headline
-                msg = '%s' % (final_ticker.rjust(len(final_ticker)+1))
-                self.view.set_footer(urwid.AttrWrap(
-                    urwid.Text(msg), 'breaking'))
-                self.set_latest_links(text[self.ticker_count].url)
-            elif text[self.ticker_count].url and text[self.ticker_count].breaking == "true":
-                final_ticker = "[" + text[self.ticker_count].prompt + \
-                    "] " + text[self.ticker_count].headline
-                msg = '%s' % (final_ticker.rjust(len(final_ticker)+1))
-                self.view.set_footer(urwid.AttrWrap(
-                    urwid.Text(msg), 'breaking'))
-                self.set_latest_links(text[self.ticker_count].url)
-            else:
-                self.set_status_bar(
-                    "[" + text[self.ticker_count].prompt + "] " + text[self.ticker_count].headline)
-                self.set_latest_links(text[self.ticker_count].url)
-        self.loop.set_alarm_in(10, self.next_item)
 
     def _wrapped_refresh(self, loop, *args):
         online = self.isOnline()
-        self.update_ticker()
         self.refresh_with_new_stories()
         ct = datetime.now().strftime('%H:%M:%S')
         if online is False:
